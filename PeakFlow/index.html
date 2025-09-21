@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeakFlow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --background: #ffffff;
+            --text: #000000;
+            --card-bg: #f8f9fa;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-theme {
+            --primary: #4cc9f0;
+            --secondary: #4361ee;
+            --success: #3a0ca3;
+            --warning: #f72585;
+            --light: #343a40;
+            --dark: #f8f9fa;
+            --gray: #adb5bd;
+            --background: #121212;
+            --text: #ffffff;
+            --card-bg: #1e1e1e;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--secondary);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px var(--shadow);
+            height: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .todo-input {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        input, textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        button.delete {
+            background-color: var(--warning);
+        }
+
+        button.delete:hover {
+            background-color: #d11450;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: var(--gray);
+        }
+
+        .stopwatch-display {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .stopwatch-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .lap-times {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .lap-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .notes-area {
+            width: 100%;
+            min-height: 250px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        /* Calendar Styles */
+        .calendar {
+            width: 100%;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background-color: var(--light);
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-day.checked {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .calendar-day.current {
+            border: 2px solid var(--primary);
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray);
+            color: var(--gray);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stopwatch-display {
+                font-size: 2.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 8px 12px;
+            }
+            
+            .calendar-weekdays, .calendar-days {
+                gap: 3px;
+            }
+            
+            .day-number {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="" alt="">
+        <h1>Peak Flow</h1>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i> Dark Mode
+        </button>
+    </header>
+
+    <div class="dashboard">
+        <!-- To-Do List Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">To-Do List</h2>
+                <i class="fas fa-tasks fa-2x" style="color: var(--primary);"></i>
+            </div>
+            <div class="todo-input">
+                <input type="text" id="todoInput" placeholder="Add a new task...">
+                <button id="addTodoBtn">Add</button>
+            </div>
+            <ul id="todoList"></ul>
+        </div>
+
+        <!-- Stopwatch Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Stopwatch</h2>
+                <i class="fas fa-stopwatch fa-2x" style="color: var(--primary);"></i>
+            </div>
+            <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div>
+            <div class="stopwatch-controls">
+                <button id="startStopBtn">Start</button>
+                <button id="lapBtn" disabled>Lap</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            <div class="lap-times" id="lapTimes"></div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Productivity Calendar</h2>
+                <i class="fas fa-calendar-alt fa-2x" style="color: var(--primary);"></i>
+            </div>
+            <div class="calendar">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
+                        <button id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-title" id="calendarTitle">January 2023</div>
+                </div>
+                <div class="calendar-weekdays">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+        </div>
+
+        <!-- Quick Notes Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Notes</h2>
+                <i class="fas fa-sticky-note fa-2x" style="color: var(--primary);"></i>
+            </div>
+            <textarea class="notes-area" id="notesArea" placeholder="Write your notes here..."></textarea>
+            <button id="saveNotesBtn">Save Notes</button>
+        </div>
+    </div>
+
+    <footer>
+        <h5>Peak Flow - Your all-in-one productivity tool for a better life</h5>
+        <p>&copy; 2025 Prateek Pvt. Ltd. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // // Theme Toggle Functionality
+        // const themeToggle = document.getElementById('themeToggle');
+        // const body = document.body;
+        
+        // themeToggle.addEventListener('click', () => {
+        //     body.classList.toggle('dark-theme');
+        //     if (body.classList.contains('dark-theme')) {
+        //         themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        //     } else {
+        //         themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        //     }
+        // });
+        // Theme Toggle Functionality
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+
+// Enable dark mode by default
+body.classList.add('dark-theme');
+themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+
+themeToggle.addEventListener('click', () => {
+    body.classList.toggle('dark-theme');
+    if (body.classList.contains('dark-theme')) {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    } else {
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+    }
+});
+
+
+        // To-Do List Functionality
+        const todoInput = document.getElementById('todoInput');
+        const addTodoBtn = document.getElementById('addTodoBtn');
+        const todoList = document.getElementById('todoList');
+        
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        
+        function renderTodos() {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                if (todo.completed) {
+                    li.classList.add('completed');
+                }
+                
+                li.innerHTML = `
+                    <span>${todo.text}</span>
+                    <div>
+                        <button onclick="toggleTodo(${index})" class="${todo.completed ? '' : 'complete'}">
+                            ${todo.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button onclick="deleteTodo(${index})" class="delete">Delete</button>
+                    </div>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+        
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (text) {
+                todos.push({ text, completed: false });
+                todoInput.value = '';
+                saveTodos();
+                renderTodos();
+            }
+        }
+        
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            saveTodos();
+            renderTodos();
+        }
+        
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            saveTodos();
+            renderTodos();
+        }
+        
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+        
+        addTodoBtn.addEventListener('click', addTodo);
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+        
+        // Stopwatch Functionality
+        const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const lapTimes = document.getElementById('lapTimes');
+        
+        let stopwatchInterval;
+        let isRunning = false;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let laps = [];
+        
+        function formatTime(ms) {
+            let hours = Math.floor(ms / 3600000);
+            let minutes = Math.floor((ms % 3600000) / 60000);
+            let seconds = Math.floor((ms % 60000) / 1000);
+            let milliseconds = Math.floor((ms % 1000) / 10);
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
+        }
+        
+        function updateStopwatch() {
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+            stopwatchDisplay.textContent = formatTime(elapsedTime);
+        }
+        
+        function startStopwatch() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+                isRunning = true;
+                startStopBtn.textContent = 'Pause';
+                lapBtn.disabled = false;
+            } else {
+                clearInterval(stopwatchInterval);
+                isRunning = false;
+                startStopBtn.textContent = 'Resume';
+                lapBtn.disabled = true;
+            }
+        }
+        
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            isRunning = false;
+            elapsedTime = 0;
+            stopwatchDisplay.textContent = formatTime(0);
+            startStopBtn.textContent = 'Start';
+            lapBtn.disabled = true;
+            laps = [];
+            lapTimes.innerHTML = '';
+        }
+        
+        function recordLap() {
+            if (isRunning) {
+                laps.push(elapsedTime);
+                const lapItem = document.createElement('div');
+                lapItem.className = 'lap-item';
+                lapItem.textContent = `Lap ${laps.length}: ${formatTime(elapsedTime)}`;
+                lapTimes.appendChild(lapItem);
+                lapTimes.scrollTop = lapTimes.scrollHeight;
+            }
+        }
+        
+        startStopBtn.addEventListener('click', startStopwatch);
+        lapBtn.addEventListener('click', recordLap);
+        resetBtn.addEventListener('click', resetStopwatch);
+        
+        // Calendar Functionality
+        const calendarTitle = document.getElementById('calendarTitle');
+        const calendarDays = document.getElementById('calendarDays');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        
+        let currentDate = new Date();
+        let trackedDays = JSON.parse(localStorage.getItem('trackedDays')) || {};
+        
+        function renderCalendar() {
+            // Clear previous calendar
+            calendarDays.innerHTML = '';
+            
+            // Set title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            calendarTitle.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            
+            // Create a copy of the date to avoid mutation
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // Get day of week for first day (0 = Sunday, 6 = Saturday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            
+            // Get number of days in month
+            const daysInMonth = lastDayOfMonth.getDate();
+            
+            // Get days from previous month to display
+            const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+            
+            // Create days from previous month
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.innerHTML = `<span class="day-number">${prevMonthLastDay - i}</span>`;
+                calendarDays.appendChild(day);
+            }
+            
+            // Create days for current month
+            const today = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            const monthKey = `${currentYear}-${currentMonth + 1}`;
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                
+                // Check if this day is today
+                if (i === today.getDate() && 
+                    currentMonth === today.getMonth() && 
+                    currentYear === today.getFullYear()) {
+                    day.classList.add('current');
+                }
+                
+                // Check if this day is marked
+                if (trackedDays[monthKey] && trackedDays[monthKey].includes(i)) {
+                    day.classList.add('checked');
+                }
+                
+                day.innerHTML = `<span class="day-number">${i}</span>`;
+                
+                // Add click event to mark/unmark day
+                day.addEventListener('click', () => toggleDay(i));
+                
+                calendarDays.appendChild(day);
+            }
+            
+            // Calculate how many days from next month to show
+            const totalCells = 42; // 6 rows x 7 columns
+            const daysSoFar = firstDayOfWeek + daysInMonth;
+            const nextMonthDays = totalCells - daysSoFar;
+            
+            // Create days for next month
+            for (let i = 1; i <= nextMonthDays; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.innerHTML = `<span class="day-number">${i}</span>`;
+                calendarDays.appendChild(day);
+            }
+        }
+        
+        function toggleDay(day) {
+            const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`;
+            
+            // Initialize if not exists
+            if (!trackedDays[monthKey]) {
+                trackedDays[monthKey] = [];
+            }
+            
+            // Toggle day
+            const index = trackedDays[monthKey].indexOf(day);
+            if (index > -1) {
+                trackedDays[monthKey].splice(index, 1);
+            } else {
+                trackedDays[monthKey].push(day);
+            }
+            
+            // Save and re-render
+            localStorage.setItem('trackedDays', JSON.stringify(trackedDays));
+            renderCalendar();
+        }
+        
+        function changeMonth(step) {
+            currentDate.setMonth(currentDate.getMonth() + step);
+            renderCalendar();
+        }
+        
+        prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+        nextMonthBtn.addEventListener('click', () => changeMonth(1));
+        
+        // Notes Functionality
+        const notesArea = document.getElementById('notesArea');
+        const saveNotesBtn = document.getElementById('saveNotesBtn');
+        
+        notesArea.value = localStorage.getItem('notes') || '';
+        
+        function saveNotes() {
+            localStorage.setItem('notes', notesArea.value);
+            alert('Notes saved successfully!');
+        }
+        
+        saveNotesBtn.addEventListener('click', saveNotes);
+        
+        // Initialize all components
+        renderTodos();
+        renderCalendar();
+    </script>
+</body>
+</html>
